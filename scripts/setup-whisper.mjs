@@ -1,7 +1,8 @@
 import { installWhisperCpp, downloadWhisperModel } from '@remotion/install-whisper-cpp';
 import path from 'node:path';
 
-const to = path.join(process.cwd(), 'data', 'whisper');
+const dataDir = process.env.SIMPLECAPTION_DATA ?? path.join(process.cwd(), 'data');
+const to = path.join(dataDir, 'whisper');
 const model = process.env.WHISPER_MODEL ?? 'small';
 const version = '1.5.5';
 

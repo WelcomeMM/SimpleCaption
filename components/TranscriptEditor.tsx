@@ -11,7 +11,9 @@ interface TranscriptEditorProps {
 function rebuildCaptions(newText: string, captions: Caption[]): Caption[] {
   const words = newText.trim().split(/\s+/).filter(Boolean);
 
-  if (words.length === 0 || captions.length === 0) return captions;
+  // Clearing the transcript must be honored (otherwise the render keeps old words).
+  if (words.length === 0) return [];
+  if (captions.length === 0) return captions;
 
   if (words.length === captions.length) {
     // Common case: typo fix — keep timing, replace text
@@ -72,7 +74,8 @@ export default function TranscriptEditor({ captions, onChange }: TranscriptEdito
     setIsDirty(false);
   }, [localText, captions, onChange]);
 
-  const wordCount = captions.length;
+  // Derive from the live text so the count updates immediately while typing.
+  const wordCount = localText.trim().split(/\s+/).filter(Boolean).length;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>

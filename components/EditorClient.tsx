@@ -110,7 +110,9 @@ export default function EditorClient({ jobId }: Props) {
 
         setJob(data);
 
-        if (data.status === 'ready' || data.status === 'done') {
+        if (data.status === 'ready' || data.status === 'done' || data.status === 'rendering') {
+          // Transcription finished — load captions once, then stop the job poll.
+          // (During 'rendering' the dedicated render poller tracks progress.)
           setCaptions(data.captions ?? []);
           if (pollRef.current) clearInterval(pollRef.current);
         } else if (data.status === 'error') {

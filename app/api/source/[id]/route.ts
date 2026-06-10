@@ -24,7 +24,8 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ id: string 
   if (range) {
     const m = /bytes=(\d+)-(\d*)/.exec(range);
     const start = m ? parseInt(m[1], 10) : 0;
-    const end = m && m[2] ? parseInt(m[2], 10) : size - 1;
+    // Clamp end to the last byte (RFC 7233) so Content-Length never overstates the body.
+    const end = Math.min(m && m[2] ? parseInt(m[2], 10) : size - 1, size - 1);
     const stream = fs.createReadStream(job.sourceFile, { start, end });
     return new Response(Readable.toWeb(stream) as unknown as ReadableStream, {
       status: 206,

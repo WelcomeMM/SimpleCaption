@@ -24,16 +24,18 @@ function getFreePort(): Promise<number> {
   });
 }
 
-let bundlePromise: Promise<string> | null = null;
+// Cache the (expensive) Remotion bundle on globalThis so it survives Next.js
+// dev HMR and is reused across renders within the process.
+const globalForBundle = globalThis as unknown as { __simpleCaptionBundle?: Promise<string> | null };
 function getBundle(): Promise<string> {
-  if (!bundlePromise) {
+  if (!globalForBundle.__simpleCaptionBundle) {
     const entry = path.join(process.cwd(), 'remotion', 'index.ts');
-    bundlePromise = bundle({ entryPoint: entry }).catch((e) => {
-      bundlePromise = null; // allow retry on next render
+    globalForBundle.__simpleCaptionBundle = bundle({ entryPoint: entry }).catch((e) => {
+      globalForBundle.__simpleCaptionBundle = null; // allow retry on next render
       throw e;
     });
   }
-  return bundlePromise;
+  return globalForBundle.__simpleCaptionBundle;
 }
 
 export async function renderJob(jobId: string, props: CaptionedVideoProps): Promise<string> {
@@ -45,12 +47,15 @@ export async function renderJob(jobId: string, props: CaptionedVideoProps): Prom
 
   try {
     const serveUrl = await getBundle();
+    // One free port, reused for both sequential server starts — avoids a
+    // TOCTOU race between two separate probe-and-close port lookups.
+    const port = await getFreePort();
 
     const composition = await selectComposition({
       serveUrl,
       id: 'CaptionedVideo',
       inputProps,
-      port: await getFreePort(),
+      port,
     });
 
     const out = path.join(ensureDir(renderDir(jobId)), 'output.mp4');
@@ -60,7 +65,7 @@ export async function renderJob(jobId: string, props: CaptionedVideoProps): Prom
       codec: 'h264',
       outputLocation: out,
       inputProps,
-      port: await getFreePort(),
+      port,
       onProgress: ({ progress }) => updateJob(jobId, { renderProgress: progress }),
     });
 

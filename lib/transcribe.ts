@@ -5,8 +5,7 @@
  * Supported values: tiny | tiny.en | base | base.en | small | small.en |
  *                   medium | medium.en | large-v1 | large-v2 | large-v3 | large-v3-turbo
  *
- * TODO (YAGNI — do not implement now): if the local whisper install is
- * unavailable, fall back to the OpenAI Whisper API (openai.audio.transcriptions).
+ * Future: optional OpenAI Whisper API fallback if local whisper is unavailable.
  */
 
 import path from 'node:path';
@@ -20,8 +19,10 @@ import {
 } from '@remotion/install-whisper-cpp';
 import type { Caption } from '@remotion/captions';
 import { extractWav } from './media';
+import { dataDir } from './storage';
 
-const WHISPER_DIR = path.join(process.cwd(), 'data', 'whisper');
+// Keep whisper binaries/models inside the configured data dir (honors SIMPLECAPTION_DATA).
+const WHISPER_DIR = path.join(dataDir(), 'whisper');
 const WHISPER_VERSION = '1.5.5';
 const MODEL = (process.env.WHISPER_MODEL ?? 'small') as
   | 'tiny'
