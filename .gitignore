@@ -34,3 +34,11 @@ Thumbs.db
 
 # test artifacts
 coverage/
+
+# build/runtime artifacts
+tsconfig.tsbuildinfo
+/tmp.json
+
+# test / debug artifacts
+.playwright-mcp/
+/*.png

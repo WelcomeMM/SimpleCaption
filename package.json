@@ -1,0 +1,37 @@
+{
+  "name": "simplecaption",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "setup:whisper": "node scripts/setup-whisper.mjs",
+    "smoke": "node scripts/smoke-render.mjs"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.475",
+    "@remotion/captions": "4.0.475",
+    "@remotion/install-whisper-cpp": "4.0.475",
+    "@remotion/media-parser": "4.0.475",
+    "@remotion/player": "4.0.475",
+    "@remotion/renderer": "4.0.475",
+    "ffmpeg-static": "5.3.0",
+    "next": "15.5.19",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.475"
+  },
+  "devDependencies": {
+    "@types/node": "22.10.0",
+    "@types/react": "19.2.0",
+    "@types/react-dom": "19.2.0",
+    "autoprefixer": "10.4.20",
+    "postcss": "8.4.49",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.7.3",
+    "vitest": "4.1.8"
+  }
+}
