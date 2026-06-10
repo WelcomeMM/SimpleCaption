@@ -1,0 +1,36 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# remotion
+.remotion/
+
+# runtime data (user media, renders, whisper models/binaries)
+/data/
+whisper.cpp/
+*.mp4
+!docs/**/*.mp4
+
+# env
+.env
+.env*.local
+
+# logs
+*.log
+npm-debug.log*
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# test artifacts
+coverage/
