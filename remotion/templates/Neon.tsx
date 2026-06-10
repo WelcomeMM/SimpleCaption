@@ -38,6 +38,8 @@ export const Neon: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) => 
                 display: 'inline-block',
                 color: style.textColor,
                 WebkitTextStroke: `${style.strokeWidth}px ${style.strokeColor}`,
+                paintOrder: 'stroke',
+                strokeLinejoin: 'round',
                 textShadow: glow,
                 transform: isActive ? 'scale(1.1)' : 'scale(1)',
                 transformOrigin: 'center center',

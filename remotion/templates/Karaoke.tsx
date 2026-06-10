@@ -37,6 +37,8 @@ export const Karaoke: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) 
                 display: 'inline-block',
                 color: lit ? style.highlightColor : style.textColor,
                 WebkitTextStroke: `${style.strokeWidth}px ${style.strokeColor}`,
+                paintOrder: 'stroke',
+                strokeLinejoin: 'round',
                 transition: 'color 0.05s ease',
                 lineHeight: 1.15,
                 whiteSpace: 'pre',

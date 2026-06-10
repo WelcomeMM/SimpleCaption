@@ -35,6 +35,8 @@ export const Beasty: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) =
                 display: 'inline-block',
                 color: isActive ? style.highlightColor : style.textColor,
                 WebkitTextStroke: `${style.strokeWidth}px ${style.strokeColor}`,
+                paintOrder: 'stroke',
+                strokeLinejoin: 'round',
                 transform: isActive ? 'scale(1.15)' : 'scale(1)',
                 transformOrigin: 'center bottom',
                 transition: 'transform 0.06s ease, color 0.06s ease',

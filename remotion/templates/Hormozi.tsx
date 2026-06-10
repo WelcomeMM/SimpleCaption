@@ -40,6 +40,8 @@ export const Hormozi: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) 
                 WebkitTextStroke: isActive
                   ? 'none'
                   : `${style.strokeWidth}px ${style.strokeColor}`,
+                paintOrder: isActive ? undefined : 'stroke',
+                strokeLinejoin: isActive ? undefined : 'round',
                 transform: isActive ? 'scale(1.06)' : 'scale(1)',
                 transformOrigin: 'center center',
                 transition: 'transform 0.08s ease, background-color 0.08s ease',
