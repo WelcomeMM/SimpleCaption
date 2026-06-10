@@ -6,6 +6,21 @@ import Dropzone from '@/components/Dropzone';
 
 type UploadState = 'idle' | 'uploading' | 'transcribing' | 'error';
 
+const LANGUAGES: { value: string; label: string }[] = [
+  { value: 'auto', label: 'Auto-detect' },
+  { value: 'fr', label: 'Français' },
+  { value: 'en', label: 'English' },
+  { value: 'es', label: 'Español' },
+  { value: 'pt', label: 'Português' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'it', label: 'Italiano' },
+  { value: 'nl', label: 'Nederlands' },
+  { value: 'ar', label: 'العربية' },
+  { value: 'ru', label: 'Русский' },
+  { value: 'zh', label: '中文' },
+  { value: 'ja', label: '日本語' },
+];
+
 const FEATURES = [
   { icon: '◈', label: 'Free forever' },
   { icon: '◉', label: 'No watermark' },
@@ -18,6 +33,7 @@ export default function Home() {
   const [uploadState, setUploadState] = useState<UploadState>('idle');
   const [errorMsg, setErrorMsg] = useState('');
   const [fileName, setFileName] = useState('');
+  const [language, setLanguage] = useState('auto');
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -41,7 +57,7 @@ export default function Home() {
         const txRes = await fetch('/api/transcribe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ jobId }),
+          body: JSON.stringify({ jobId, language }),
         });
         if (!txRes.ok) {
           const body = await txRes.json().catch(() => ({}));
@@ -56,7 +72,7 @@ export default function Home() {
         setUploadState('error');
       }
     },
-    [router],
+    [router, language],
   );
 
   const isDisabled = uploadState === 'uploading' || uploadState === 'transcribing';
@@ -150,6 +166,52 @@ export default function Home() {
           style={{ width: '100%', animationDelay: '80ms' }}
         >
           <Dropzone onFile={handleFile} disabled={isDisabled} />
+        </div>
+
+        {/* Language selector */}
+        <div
+          className="animate-fade-up"
+          style={{ width: '100%', animationDelay: '120ms' }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label
+              htmlFor="language-select"
+              style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-muted)', letterSpacing: '0.02em' }}
+            >
+              Spoken language
+            </label>
+            <select
+              id="language-select"
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              disabled={isDisabled}
+              style={{
+                width: '100%',
+                padding: '9px 12px',
+                borderRadius: '8px',
+                background: 'var(--bg-surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--text-primary)',
+                fontSize: '13px',
+                fontWeight: 400,
+                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                outline: 'none',
+                appearance: 'none',
+                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E")`,
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'right 12px center',
+                paddingRight: '32px',
+                opacity: isDisabled ? 0.5 : 1,
+              }}
+            >
+              {LANGUAGES.map(({ value, label }) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: 0 }}>
+              Leave on Auto-detect unless results look wrong.
+            </p>
+          </div>
         </div>
 
         {/* Upload state indicator */}

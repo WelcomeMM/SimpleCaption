@@ -17,6 +17,7 @@ import {
   transcribe as whisperTranscribe,
   toCaptions,
 } from '@remotion/install-whisper-cpp';
+import type { Language } from '@remotion/install-whisper-cpp';
 import type { Caption } from '@remotion/captions';
 import { extractWav } from './media';
 import { dataDir } from './storage';
@@ -44,7 +45,7 @@ async function ensureWhisper(): Promise<void> {
 }
 
 /** Transcribe a media file to word-level captions. */
-export async function transcribeFile(inputPath: string): Promise<Caption[]> {
+export async function transcribeFile(inputPath: string, language: Language = 'auto'): Promise<Caption[]> {
   const wav = path.join(os.tmpdir(), `sc-${Date.now()}.wav`);
   await extractWav(inputPath, wav);
   try {
@@ -56,6 +57,7 @@ export async function transcribeFile(inputPath: string): Promise<Caption[]> {
       whisperCppVersion: WHISPER_VERSION,
       modelFolder: WHISPER_DIR,
       tokenLevelTimestamps: true,
+      language,
     });
     const { captions } = toCaptions({ whisperCppOutput: result });
     return captions;

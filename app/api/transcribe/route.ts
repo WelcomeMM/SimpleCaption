@@ -7,7 +7,12 @@ export const runtime = 'nodejs';
 export const maxDuration = 600;
 
 export async function POST(req: NextRequest) {
-  const { jobId } = await req.json();
+  const body = await req.json();
+  const { jobId } = body;
+  const rawLanguage: unknown = body.language;
+  const language = typeof rawLanguage === 'string' && rawLanguage.length > 0 && rawLanguage.length <= 20
+    ? rawLanguage as import('@remotion/install-whisper-cpp').Language
+    : 'auto' as const;
   const job = getJob(jobId);
   if (!job) return NextResponse.json({ error: 'No job' }, { status: 404 });
   if (job.status === 'transcribing') return NextResponse.json({ ok: true });
@@ -16,7 +21,7 @@ export async function POST(req: NextRequest) {
   (async () => {
     try {
       const meta = await readMediaMeta(job.sourceFile, job.isAudioOnly);
-      const captions = await transcribeFile(job.sourceFile);
+      const captions = await transcribeFile(job.sourceFile, language);
       setStatus(jobId, 'ready', {
         width: meta.width, height: meta.height, fps: meta.fps,
         durationInSeconds: meta.durationInSeconds, captions,
