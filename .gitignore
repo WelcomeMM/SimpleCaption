@@ -34,3 +34,7 @@ Thumbs.db
 
 # test artifacts
 coverage/
+
+# build/runtime artifacts
+tsconfig.tsbuildinfo
+/tmp.json
