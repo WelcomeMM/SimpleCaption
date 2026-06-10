@@ -1,7 +1,9 @@
 import React from 'react';
-import { AbsoluteFill } from 'remotion';
+import { AbsoluteFill, interpolate } from 'remotion';
 import type { TemplatePageProps } from './types';
 import { positionStyle } from './shared';
+
+const FADE_MS = 70;
 
 export const Neon: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) => {
   return (
@@ -25,9 +27,22 @@ export const Neon: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) => 
         {tokens.map((tok, i) => {
           const isActive = timeMs >= tok.fromMs && timeMs < tok.toMs;
           const word = style.uppercase ? tok.text.toUpperCase() : tok.text;
-          const glow = isActive
-            ? `0 0 8px ${style.highlightColor}, 0 0 20px ${style.highlightColor}, 0 0 40px ${style.highlightColor}`
-            : `0 0 12px ${style.highlightColor}, 0 0 24px ${style.highlightColor}`;
+
+          let progress: number;
+          if (isActive) {
+            progress = interpolate(timeMs - tok.fromMs, [0, FADE_MS], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+          } else if (timeMs >= tok.toMs) {
+            progress = interpolate(timeMs - tok.toMs, [0, FADE_MS], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+          } else {
+            progress = 0;
+          }
+
+          const scale = 1 + 0.1 * progress;
+          // Glow intensifies as the word becomes active
+          const baseGlow = `0 0 12px ${style.highlightColor}, 0 0 24px ${style.highlightColor}`;
+          const activeGlow = `0 0 8px ${style.highlightColor}, 0 0 20px ${style.highlightColor}, 0 0 40px ${style.highlightColor}`;
+          const glow = progress > 0 ? activeGlow : baseGlow;
+
           return (
             <span
               key={i}
@@ -41,9 +56,8 @@ export const Neon: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) => 
                 paintOrder: 'stroke',
                 strokeLinejoin: 'round',
                 textShadow: glow,
-                transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                transform: `scale(${scale})`,
                 transformOrigin: 'center center',
-                transition: 'transform 0.07s ease, text-shadow 0.07s ease',
                 lineHeight: 1.15,
                 whiteSpace: 'pre',
               }}

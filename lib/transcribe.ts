@@ -60,7 +60,18 @@ export async function transcribeFile(inputPath: string, language: Language = 'au
       language,
     });
     const { captions } = toCaptions({ whisperCppOutput: result });
-    return captions;
+    // DTW timestamps (timestampMs = t_dtw * 10ms) are aligned to actual audio via
+    // forced alignment and are more accurate than segment offsets — especially for
+    // the first word, which whisper anchors to 0ms even when speech starts later.
+    return captions.map((cap, i) => {
+      if (cap.timestampMs == null || cap.timestampMs <= 0) return cap;
+      const nextDtw = i < captions.length - 1 ? captions[i + 1].timestampMs : null;
+      return {
+        ...cap,
+        startMs: cap.timestampMs,
+        endMs: nextDtw != null && nextDtw > cap.timestampMs ? nextDtw : cap.endMs,
+      };
+    });
   } finally {
     fs.rmSync(wav, { force: true });
   }

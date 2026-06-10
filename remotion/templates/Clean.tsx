@@ -1,7 +1,9 @@
 import React from 'react';
-import { AbsoluteFill } from 'remotion';
+import { AbsoluteFill, interpolate } from 'remotion';
 import type { TemplatePageProps } from './types';
 import { positionStyle } from './shared';
+
+const FADE_MS = 80;
 
 export const Clean: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) => {
   return (
@@ -29,6 +31,16 @@ export const Clean: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) =>
         {tokens.map((tok, i) => {
           const isActive = timeMs >= tok.fromMs && timeMs < tok.toMs;
           const word = style.uppercase ? tok.text.toUpperCase() : tok.text;
+
+          let opacity: number;
+          if (isActive) {
+            opacity = interpolate(timeMs - tok.fromMs, [0, FADE_MS], [0.7, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+          } else if (timeMs >= tok.toMs) {
+            opacity = interpolate(timeMs - tok.toMs, [0, FADE_MS], [1, 0.7], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+          } else {
+            opacity = 0.7;
+          }
+
           return (
             <span
               key={i}
@@ -38,8 +50,7 @@ export const Clean: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) =>
                 fontWeight: 700,
                 display: 'inline-block',
                 color: style.textColor,
-                opacity: isActive ? 1 : 0.7,
-                transition: 'opacity 0.1s ease',
+                opacity,
                 lineHeight: 1.2,
                 whiteSpace: 'pre',
               }}
