@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "strict": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "remotion": ["./node_modules/remotion/dist/cjs/index.d.ts"]
+    }
+  },
+  "include": [
+    "remotion/**/*.ts",
+    "remotion/**/*.tsx",
+    "lib/types.ts"
+  ],
+  "exclude": ["node_modules"]
+}
