@@ -1,7 +1,13 @@
 import { randomUUID } from 'node:crypto';
 import type { Job, JobStatus } from './types';
 
-const jobs = new Map<string, Job>();
+// Next.js bundles each route handler separately, so a plain module-level Map is
+// NOT shared across routes (upload would create a job that transcribe/render
+// cannot see). Anchoring the Map on globalThis makes it a true per-process
+// singleton shared by every route, and also survives dev-mode HMR.
+const globalForJobs = globalThis as unknown as { __simpleCaptionJobs?: Map<string, Job> };
+const jobs: Map<string, Job> = globalForJobs.__simpleCaptionJobs ?? new Map<string, Job>();
+globalForJobs.__simpleCaptionJobs = jobs;
 
 export function createJob(init: Pick<Job, 'sourceFile' | 'sourceExt' | 'isAudioOnly'>): Job {
   const job: Job = {

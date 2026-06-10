@@ -50,6 +50,7 @@ export interface Job {
   captions: Caption[];
   renderProgress: number;    // 0..1
   outputFile?: string;
-  error?: string;
+  error?: string;            // fatal (transcription) error
+  renderError?: string;      // render-only failure; job stays usable
   createdAt: number;
 }

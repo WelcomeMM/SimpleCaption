@@ -172,7 +172,8 @@ export default function EditorClient({ jobId }: Props) {
           setRenderState('done');
           setRenderProgress(1);
           if (renderPollRef.current) clearInterval(renderPollRef.current);
-        } else if (data.status === 'error') {
+        } else if (data.error) {
+          // Render failed; job itself stays usable (status back to 'ready').
           setRenderState('error');
           setRenderError(data.error ?? 'Render failed');
           if (renderPollRef.current) clearInterval(renderPollRef.current);
@@ -203,6 +204,7 @@ export default function EditorClient({ jobId }: Props) {
   // Aspect ratio for the player container
   const aspectRatio =
     job && isReady && job.width && job.height ? job.width / job.height : 9 / 16;
+  const isPortrait = aspectRatio < 1;
 
   // ── Loading / error states ───────────────────────────────────────────────
   if (pollError) {
@@ -233,7 +235,8 @@ export default function EditorClient({ jobId }: Props) {
   return (
     <div
       style={{
-        minHeight: '100vh',
+        height: '100vh',
+        overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         background: 'var(--bg-void)',
@@ -355,10 +358,13 @@ export default function EditorClient({ jobId }: Props) {
           {isReady && job ? (
             <div
               style={{
+                aspectRatio: String(aspectRatio),
+                // Anchor one dimension definitely so aspect-ratio can resolve;
+                // otherwise the Player falls back to the composition's native size.
+                height: isPortrait ? 'min(80vh, 100%)' : 'auto',
+                width: isPortrait ? 'auto' : 'min(100%, calc(80vh * ' + aspectRatio + '))',
                 maxHeight: '80vh',
                 maxWidth: '100%',
-                aspectRatio: String(aspectRatio),
-                width: aspectRatio < 1 ? 'auto' : '100%',
                 borderRadius: '12px',
                 overflow: 'hidden',
                 boxShadow: '0 8px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)',
@@ -409,6 +415,7 @@ export default function EditorClient({ jobId }: Props) {
             background: 'var(--bg-surface)',
             borderLeft: '1px solid var(--border)',
             overflow: 'hidden',
+            minHeight: 0,
           }}
         >
           {/* Scrollable controls area */}

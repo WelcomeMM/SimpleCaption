@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getJob, setStatus } from '@/lib/jobs';
+import { getJob } from '@/lib/jobs';
 import { renderJob } from '@/lib/render';
 import type { CaptionedVideoProps, StyleProps, TemplateId } from '@/lib/types';
 import type { Caption } from '@remotion/captions';
@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
     width: job.width, height: job.height, fps: job.fps,
     durationInFrames: Math.max(1, Math.round(job.durationInSeconds * job.fps)),
   };
-  renderJob(body.jobId, props).catch((e) => setStatus(body.jobId, 'error', { error: (e as Error).message }));
+  // renderJob owns its own error state (sets job.renderError, keeps job usable).
+  renderJob(body.jobId, props).catch(() => {});
   return NextResponse.json({ ok: true });
 }
