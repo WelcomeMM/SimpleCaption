@@ -44,6 +44,34 @@ async function ensureWhisper(): Promise<void> {
   await downloadWhisperModel({ model: MODEL, folder: WHISPER_DIR });
 }
 
+/**
+ * Merge consecutive BPE sub-word tokens into whole words.
+ *
+ * Whisper is invoked with --max-len 1, so each Caption is one BPE token.
+ * Tokens that don't start with a space are sub-word continuations of the
+ * preceding token (e.g. [" beau", "tiful"] → " beautiful"), as are
+ * punctuation-only tokens (e.g. [" world", "."] → " world.").
+ * Merging them produces true word-level captions that paginate cleanly.
+ */
+export function mergeSubwordTokens(captions: Caption[]): Caption[] {
+  const merged: Caption[] = [];
+  for (const cap of captions) {
+    if (cap.text === '') continue;
+    const isNewWord = merged.length === 0 || cap.text[0] === ' ';
+    if (isNewWord) {
+      merged.push({ ...cap });
+    } else {
+      const prev = merged[merged.length - 1];
+      merged[merged.length - 1] = {
+        ...prev,
+        text: prev.text + cap.text,
+        endMs: cap.endMs,
+      };
+    }
+  }
+  return merged;
+}
+
 /** Transcribe a media file to word-level captions. */
 export async function transcribeFile(inputPath: string, language: Language = 'auto'): Promise<Caption[]> {
   const wav = path.join(os.tmpdir(), `sc-${Date.now()}.wav`);
@@ -63,7 +91,7 @@ export async function transcribeFile(inputPath: string, language: Language = 'au
     // DTW timestamps (timestampMs = t_dtw * 10ms) are aligned to actual audio via
     // forced alignment and are more accurate than segment offsets — especially for
     // the first word, which whisper anchors to 0ms even when speech starts later.
-    return captions.map((cap, i) => {
+    const withDtw = captions.map((cap, i) => {
       if (cap.timestampMs == null || cap.timestampMs <= 0) return cap;
       const nextDtw = i < captions.length - 1 ? captions[i + 1].timestampMs : null;
       return {
@@ -72,6 +100,8 @@ export async function transcribeFile(inputPath: string, language: Language = 'au
         endMs: nextDtw != null && nextDtw > cap.timestampMs ? nextDtw : cap.endMs,
       };
     });
+    // Merge BPE sub-word tokens so each Caption is exactly one spoken word.
+    return mergeSubwordTokens(withDtw);
   } finally {
     fs.rmSync(wav, { force: true });
   }

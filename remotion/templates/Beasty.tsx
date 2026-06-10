@@ -31,8 +31,6 @@ export const Beasty: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) =
           let progress: number;
           if (isActive) {
             progress = interpolate(timeMs - tok.fromMs, [0, FADE_MS], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-          } else if (timeMs >= tok.toMs) {
-            progress = interpolate(timeMs - tok.toMs, [0, FADE_MS], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
           } else {
             progress = 0;
           }

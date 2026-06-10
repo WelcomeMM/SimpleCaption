@@ -35,8 +35,6 @@ export const Clean: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) =>
           let opacity: number;
           if (isActive) {
             opacity = interpolate(timeMs - tok.fromMs, [0, FADE_MS], [0.7, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-          } else if (timeMs >= tok.toMs) {
-            opacity = interpolate(timeMs - tok.toMs, [0, FADE_MS], [1, 0.7], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
           } else {
             opacity = 0.7;
           }

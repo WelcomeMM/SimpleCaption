@@ -28,13 +28,11 @@ export const Hormozi: React.FC<TemplatePageProps> = ({ tokens, timeMs, style }) 
           const isActive = timeMs >= tok.fromMs && timeMs < tok.toMs;
           const word = style.uppercase ? tok.text.toUpperCase() : tok.text;
 
-          // Frame-accurate progress replaces CSS transition so the rendered
-          // video gets smooth interpolation, not an instant snap.
+          // Fade in when the word becomes active; snap to inactive once it ends.
+          // Past words snap off immediately so only one word animates at a time.
           let progress: number;
           if (isActive) {
             progress = interpolate(timeMs - tok.fromMs, [0, FADE_MS], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
-          } else if (timeMs >= tok.toMs) {
-            progress = interpolate(timeMs - tok.toMs, [0, FADE_MS], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
           } else {
             progress = 0;
           }
