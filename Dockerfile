@@ -1,26 +1,12 @@
-# SimpleCaption — production image
-#
-# Based on Remotion's official headless-Chrome Linux deployment guidance:
-# https://www.remotion.dev/docs/lambda/setup (system deps section)
-#
-# NOTE: Before transcription works you must either:
-#   1. Run `npm run setup:whisper` inside the container after first start, OR
-#   2. Mount a pre-built whisper directory at /app/data/whisper.
-#
-# Mount /app/data as a volume for persistent uploads, renders, and the whisper model.
-#
-# Example:
-#   docker build -t simplecaption .
-#   docker run -p 3000:3000 -v $(pwd)/data:/app/data simplecaption
+FROM node:22-bookworm
 
-FROM node:22-bookworm-slim
-
-# System libraries required by Remotion's Chrome Headless Shell on Debian
+# Chromium for Remotion's headless renderer + its runtime libs
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
+    chromium \
     libnss3 \
     libdbus-1-3 \
     libatk1.0-0 \
+    libatk-bridge2.0-0 \
     libgbm-dev \
     libasound2 \
     libxrandr2 \
@@ -28,27 +14,33 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxfixes3 \
     libxcomposite1 \
     libxdamage1 \
-    libatk-bridge2.0-0 \
     libpango-1.0-0 \
     libcairo2 \
     libcups2 \
     libxss1 \
     libxshmfence1 \
     fonts-liberation \
-  && rm -rf /var/lib/apt/lists/*
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Tell Puppeteer / Remotion to use system Chromium instead of downloading one
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
-# Install dependencies first (layer-cached unless package.json changes)
+# Install deps before copying source so this layer is cached across code changes
 COPY package*.json ./
 RUN npm ci
 
-# Copy source
 COPY . .
-
-# Build Next.js app
 RUN npm run build
 
-EXPOSE 3000
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+# Uploads, renders, and the whisper binary/model all live here.
+# Mount a Docker volume at this path so data survives container restarts.
+ENV SIMPLECAPTION_DATA=/data
 
-CMD ["npm", "run", "start"]
+EXPOSE 3000
+CMD ["npm", "start"]

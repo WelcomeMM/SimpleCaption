@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  app:
+    networks:
+      - app-network
+      - dokploy-network
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3006:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - SIMPLECAPTION_DATA=/data
+      # Optional: set a larger whisper model for better accuracy
+      # - WHISPER_MODEL=medium
+    volumes:
+      - simplecaption_data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 3G
+        reservations:
+          cpus: '0.5'
+          memory: 1G
+
+volumes:
+  simplecaption_data:
+
+networks:
+  app-network:
+    driver: bridge
+  dokploy-network:
+    external: true
