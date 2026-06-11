@@ -27,6 +27,9 @@ export interface CaptionedVideoProps {
   height: number;
   fps: number;
   durationInFrames: number;
+  /** True in the browser Player — uses native <video> for smooth playback.
+   *  False/absent during server rendering — uses OffthreadVideo for frame accuracy. */
+  isPreview?: boolean;
 }
 
 export type JobStatus =

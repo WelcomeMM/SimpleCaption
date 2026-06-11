@@ -16,9 +16,11 @@ export async function POST(req: NextRequest) {
   if (!job) return NextResponse.json({ error: 'No job' }, { status: 404 });
   if (job.status === 'rendering') return NextResponse.json({ ok: true });
 
-  const origin = req.nextUrl.origin; // e.g. http://localhost:3000
+  // Always use the internal address so Remotion's headless Chrome (running in the
+  // same container) can reach the source file. Using req.nextUrl.origin would give
+  // the Traefik-proxied HTTPS URL, which has no cert on the internal port.
   const props: CaptionedVideoProps = {
-    src: `${origin}/api/source/${job.id}`,
+    src: `http://localhost:${process.env.PORT ?? 3000}/api/source/${job.id}`,
     isAudioOnly: job.isAudioOnly,
     captions: body.captions ?? job.captions,
     template: body.template,

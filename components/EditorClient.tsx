@@ -385,6 +385,7 @@ export default function EditorClient({ jobId }: Props) {
                   height: job.height,
                   fps: job.fps,
                   durationInFrames,
+                  isPreview: true,
                 }}
                 durationInFrames={durationInFrames}
                 fps={job.fps}
