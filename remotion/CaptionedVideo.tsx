@@ -37,7 +37,7 @@ export const CaptionedVideo: React.FC<CaptionedVideoProps> = (props) => {
       {props.isAudioOnly
         ? <Audio src={props.src} />
         : props.isPreview
-          ? <Video src={props.src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} pauseWhenLoading />
+          ? <Video src={props.src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           : <OffthreadVideo src={props.src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
       {pages.map((page, i) => {
         const from = Math.round((page.startMs / 1000) * fps);
