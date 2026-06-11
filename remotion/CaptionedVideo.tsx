@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import {
   AbsoluteFill,
-  OffthreadVideo,
+  Video,
   Audio,
   Sequence,
   useVideoConfig,
@@ -35,7 +35,7 @@ export const CaptionedVideo: React.FC<CaptionedVideoProps> = (props) => {
     <AbsoluteFill style={{ backgroundColor: props.backgroundColor }}>
       {props.isAudioOnly
         ? <Audio src={props.src} />
-        : <OffthreadVideo src={props.src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+        : <Video src={props.src} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
       {pages.map((page, i) => {
         const from = Math.round((page.startMs / 1000) * fps);
         const durationInFrames = Math.max(1, Math.round((page.durationMs / 1000) * fps));
